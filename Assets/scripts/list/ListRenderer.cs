@@ -112,13 +112,18 @@ public class ListRenderer : MonoBehaviour
             {
                 //获取item相对于scroll的坐标
                 float posY = scroll.transform.InverseTransformPoint(item.transform.position).y;
-                if(i == 0)
+                /*if(i == 0)
                 {
-                    print("posY: " + posY);
+                    print("first posY: " + posY);
                     print("this.top: " + this.top);
                     print("this.curIndex: " + this.curIndex);
                     print("this.totalCount - this.showCount: " + (this.totalCount - this.showCount));
                 }
+                else if (i == this.itemList.Count - 1)
+                {
+                    print("last posY: " + posY);
+                    print("this.bottom: " + this.bottom);
+                }*/
                 if (posY > this.top && this.curIndex < this.totalCount - this.showCount)
                 {
                     print("change");
@@ -177,27 +182,36 @@ public class ListRenderer : MonoBehaviour
             }
         }
 
+        //拖动时修正位置
         if (this.itemList.Count > 0)
         {
             int index = 0;
             //print("范围:" + this.curIndex + "--------" + (this.curIndex + this.showCount));
             for (int i = this.curIndex; i < this.curIndex + this.showCount; ++i)
             {
-                GameObject item = this.itemList[index];
-                if (item != null)
+                if (this.itemList[index] != null)
                 {
+                    GameObject item = this.itemList[index];
                     this.m_updateItem.Invoke(item, i);
                     index++;
                 }
             }
 
             GameObject prevItem = this.itemList[0];
+            if (this.curIndex == 0) prevItem.transform.localPosition = new Vector3(0, 0);
             for (int i = 1; i < this.itemList.Count; ++i)
             {
                 GameObject item = this.itemList[i];
-                item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                           prevItem.transform.localPosition.y - this.itemHeight - this.gapV);
-
+                if(!this.isHorizontal)
+                {
+                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
+                                                               prevItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                }
+                else
+                {
+                    item.transform.localPosition = new Vector3(prevItem.transform.localPosition.x + this.itemWidth + this.gapH,
+                                                               item.transform.localPosition.y);
+                }
                 prevItem = this.itemList[i];
             }
         }
