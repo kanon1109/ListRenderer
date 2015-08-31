@@ -59,7 +59,7 @@ public class ListRenderer : MonoBehaviour
                      float gap = 5,
                      UpdateListItem updateItem = null)
     {
-        if (count <= 0) return;
+        if (count < 0) count = 0;
         if (this.scroll == null) return;
         if (this.content == null) return;
         this.m_updateItem = updateItem;
@@ -86,8 +86,8 @@ public class ListRenderer : MonoBehaviour
     /// <returns></returns>
     void createItem(GameObject prefab, int count)
     {
-        if (count <= 0) return;
         if (this.itemList == null) this.itemList = new List<GameObject>();
+        if (count <= 0) return;
         for (int i = 0; i < count; ++i)
         {
             GameObject item = MonoBehaviour.Instantiate(prefab, new Vector3(0, 0), new Quaternion()) as GameObject;
