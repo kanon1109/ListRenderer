@@ -21,7 +21,7 @@ public class Test : MonoBehaviour
             tVo.name = "name" + i;
             //this.datalist.Add(tVo);
         }
-        this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 5 ,updateListItem);
+        this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 5, updateListItem);
 	}
 
     private void addBtnHandler()
@@ -39,20 +39,26 @@ public class Test : MonoBehaviour
 
     void btnHandler()
     {
-        int index = Random.Range(0, this.datalist.Count - 1);
-        TestVo tVo = this.datalist[this.datalist.Count - 1];
-        print("remove tVo: " + tVo.name);
-        this.datalist.RemoveAt(this.datalist.Count - 1);
-        index = Random.Range(0, this.datalist.Count - 1);
-        this.datalist.RemoveAt(this.datalist.Count - 1);
-        this.list.GetComponent<ListRenderer>().reloadData(this.datalist.Count);
+        if (this.datalist.Count > 0) 
+        {
+            int index = Random.Range(0, this.datalist.Count - 1);
+            TestVo tVo = this.datalist[this.datalist.Count - 1];
+            print("remove tVo: " + tVo.name);
+            this.datalist.RemoveAt(this.datalist.Count - 1);
+            index = Random.Range(0, this.datalist.Count - 1);
+            this.datalist.RemoveAt(this.datalist.Count - 1);
+            this.list.GetComponent<ListRenderer>().reloadData(this.datalist.Count);
+        }
     }
 
-    void updateListItem(GameObject item, int index)
+    void updateListItem(GameObject item, int index, bool isReload)
     {
-        //print("updateListItem index: " + index);
-        TestVo tVo = this.datalist[index];
-        item.GetComponent<ListItem>().txt.text = tVo.name;
+        //print("updateListItem index: " + index + "  this.datalist.Count: " + this.datalist.Count);
+        if(index < this.datalist.Count)
+        {
+            TestVo tVo = this.datalist[index];
+            item.GetComponent<ListItem>().txt.text = tVo.name;
+        }
     }
 
 	// Update is called once per frame
