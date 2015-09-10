@@ -273,11 +273,11 @@ public class ListRenderer : MonoBehaviour
         else
             this.showCount += 1; //取计算的数量 + 1
         this.totalCount = count;
-        print("count: " + count);
-        print("prevShowCount: " + prevShowCount);
-        print("this.showCount - prevShowCount: " + (this.showCount - prevShowCount));
+        //创建数量
+        int creatCount = this.showCount - prevShowCount;
+        if (creatCount < 0) creatCount = 0;
         //根据显示数量创建item
-        this.createItem(this.itemPrefab, this.showCount - prevShowCount);
+        this.createItem(this.itemPrefab, creatCount);
         //获取最新边界
         this.updateBorder();
         //设置layout可滚动范围的高宽
