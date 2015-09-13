@@ -59,6 +59,7 @@ public class ListRenderer : MonoBehaviour
                      float gap = 5,
                      UpdateListItem updateItem = null)
     {
+		this.totalCount = -1;
         if (count < 0) count = 0;
         if (this.scroll == null) return;
         if (this.content == null) return;
