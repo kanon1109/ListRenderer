@@ -19,7 +19,7 @@ public class Test : MonoBehaviour
         {
             TestVo tVo = new TestVo();
             tVo.name = "name" + i;
-            this.datalist.Add(tVo);
+            //this.datalist.Add(tVo);
         }
         this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 5 ,updateListItem);
 	}
