@@ -9,7 +9,7 @@ public class ListRenderer : MonoBehaviour
     //item的预设
     public GameObject itemPrefab;
     //更新的回调方法
-    public delegate void UpdateListItem(GameObject item, int index);
+    public delegate void UpdateListItem(GameObject item, int index, bool isReload);
     //更新列表回调方法
     private UpdateListItem m_updateItem;  
     //元素宽度
@@ -59,6 +59,7 @@ public class ListRenderer : MonoBehaviour
                      float gap = 5,
                      UpdateListItem updateItem = null)
     {
+		this.totalCount = -1;
         if (count < 0) count = 0;
         if (this.scroll == null) return;
         if (this.content == null) return;
@@ -126,28 +127,43 @@ public class ListRenderer : MonoBehaviour
                 }*/
                 if (posY > this.top && this.curIndex < this.totalCount - this.showCount)
                 {
-                    print("change");
+                    print("change：" + this.itemList.Count);
                     //往上拖动时
                     //如果第一个位置超过顶部范围，并且不是滚动到最后一个，则重新设置位置。 
-                    this.itemList.RemoveAt(i);
-                    GameObject lastItem = this.itemList[this.itemList.Count - 1];
-
-                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                               lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
-                    this.itemList.Add(item);
-                    this.curIndex++;
+                    if (this.itemList.Count > 1)
+                    {
+                        this.itemList.RemoveAt(i);
+                        GameObject lastItem = this.itemList[this.itemList.Count - 1];
+                        item.transform.localPosition = new Vector3(item.transform.localPosition.x,
+                                                                   lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                        this.itemList.Add(item);
+                        this.curIndex++;
+                    }
+                    else
+                    {
+                        item.transform.localPosition = new Vector3(item.transform.localPosition.x, -this.itemHeight - this.gapV);
+                        this.curIndex = 0;
+                    }
                     break;
                 }
                 else if (posY < this.bottom && this.curIndex > 0)
                 {
                     //往下拖动时
                     //如果底部位置超过范围,并且不是滚动到第一个位置，则重新设置位置。
-                    this.itemList.RemoveAt(i);
-                    GameObject firstItem = this.itemList[0];
-                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                               firstItem.transform.localPosition.y + this.itemHeight + this.gapV);
-                    this.itemList.Insert(0, item);
-                    this.curIndex--;
+                    if (this.itemList.Count > 1)
+                    {
+                        this.itemList.RemoveAt(i);
+                        GameObject firstItem = this.itemList[0];
+                        item.transform.localPosition = new Vector3(item.transform.localPosition.x,
+                                                                   firstItem.transform.localPosition.y + this.itemHeight + this.gapV);
+                        this.itemList.Insert(0, item);
+                        this.curIndex--;
+                    }
+                    else
+                    {
+                        item.transform.localPosition = new Vector3(item.transform.localPosition.x, -this.itemHeight - this.gapV);
+                        this.curIndex = 0;
+                    }
                     break;
                 }
             }
@@ -159,62 +175,50 @@ public class ListRenderer : MonoBehaviour
                 {
                     //往上拖动时
                     //如果第一个位置超过顶部范围，并且不是滚动到最后一个，则重新设置位置。
-                    this.itemList.RemoveAt(i);
-                    GameObject lastItem = this.itemList[this.itemList.Count - 1];
-                    item.transform.localPosition = new Vector3(lastItem.transform.localPosition.x + this.itemWidth + this.gapH,
-                                                               item.transform.localPosition.y);
-                    this.itemList.Add(item);
-                    this.curIndex++;
+                    if (this.itemList.Count > 1)
+                    {
+                        this.itemList.RemoveAt(i);
+                        GameObject lastItem = this.itemList[this.itemList.Count - 1];
+                        item.transform.localPosition = new Vector3(lastItem.transform.localPosition.x + this.itemWidth + this.gapH,
+                                                                   item.transform.localPosition.y);
+                        this.itemList.Add(item);
+                        this.curIndex++;
+                    }
+                    else
+                    {
+                        item.transform.localPosition = new Vector3(this.itemWidth + this.gapH,
+                                                                   item.transform.localPosition.y);
+                        this.curIndex = 0;
+                    }
                     break;
                 }
                 else if (posX > this.right && this.curIndex > 0)
                 {
                     //往下拖动时
                     //如果底部位置超过范围,并且不是滚动到第一个位置，则重新设置位置。
-                    this.itemList.RemoveAt(i);
-                    GameObject firstItem = this.itemList[0];
-                    item.transform.localPosition = new Vector3(firstItem.transform.localPosition.x - this.itemWidth - this.gapH,
-                                                               item.transform.localPosition.y);
-                    this.itemList.Insert(0, item);
-                    this.curIndex--;
+                    if (this.itemList.Count > 1)
+                    {
+                        this.itemList.RemoveAt(i);
+                        GameObject firstItem = this.itemList[0];
+                        item.transform.localPosition = new Vector3(firstItem.transform.localPosition.x - this.itemWidth - this.gapH,
+                                                                   item.transform.localPosition.y);
+                        this.itemList.Insert(0, item);
+                        this.curIndex--;
+                    }
+                    else
+                    {
+                        item.transform.localPosition = new Vector3(this.itemWidth + this.gapH,
+                                                                   item.transform.localPosition.y);
+                        this.curIndex = 0;
+                    }
                     break;
                 }
             }
         }
 
-        //拖动时修正位置
-        if (this.itemList.Count > 0)
-        {
-            int index = 0;
-            //print("范围:" + this.curIndex + "--------" + (this.curIndex + this.showCount));
-            for (int i = this.curIndex; i < this.curIndex + this.showCount; ++i)
-            {
-                if (this.itemList[index] != null)
-                {
-                    GameObject item = this.itemList[index];
-                    this.m_updateItem.Invoke(item, i);
-                    index++;
-                }
-            }
-
-            GameObject prevItem = this.itemList[0];
-            if (this.curIndex == 0) prevItem.transform.localPosition = new Vector3(0, 0);
-            for (int i = 1; i < this.itemList.Count; ++i)
-            {
-                GameObject item = this.itemList[i];
-                if(!this.isHorizontal)
-                {
-                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                               prevItem.transform.localPosition.y - this.itemHeight - this.gapV);
-                }
-                else
-                {
-                    item.transform.localPosition = new Vector3(prevItem.transform.localPosition.x + this.itemWidth + this.gapH,
-                                                               item.transform.localPosition.y);
-                }
-                prevItem = this.itemList[i];
-            }
-        }
+        //重新调用item回调
+        this.reloadItem();
+        this.fixItemPos();
     }
 
     /// <summary>
@@ -250,10 +254,14 @@ public class ListRenderer : MonoBehaviour
             //补全位置
             this.prevV2.y += (this.itemHeight + this.gapV) * overCount;
             this.prevV2.x -= (this.itemWidth + this.gapH) * overCount;
+            //防止去除溢出后 索引为负数。
+            if (this.curIndex < 0) this.curIndex = 0;
         }
 
         //保存上一次显示的数量
         int prevShowCount = this.showCount;
+        print("this.curIndex: " + this.curIndex);
+        print("showCount: " + showCount);
         //判断当前多出来的数量，并删除。
         this.removeOverItem(count);
         if (!this.isHorizontal) //纵向
@@ -266,10 +274,11 @@ public class ListRenderer : MonoBehaviour
         else
             this.showCount += 1; //取计算的数量 + 1
         this.totalCount = count;
-
-        print("this.showCount - prevShowCount: " + (this.showCount - prevShowCount));
+        //创建数量
+        int creatCount = this.showCount - prevShowCount;
+        if (creatCount < 0) creatCount = 0;
         //根据显示数量创建item
-        this.createItem(this.itemPrefab, this.showCount - prevShowCount);
+        this.createItem(this.itemPrefab, creatCount);
         //获取最新边界
         this.updateBorder();
         //设置layout可滚动范围的高宽
@@ -279,7 +288,61 @@ public class ListRenderer : MonoBehaviour
             this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.content.GetComponent<RectTransform>().sizeDelta.y);
         //布局
         this.layoutItem();
+        //重新调用回调
+        this.reloadItem(true);
         this.isReload = true;
+    }
+
+    /// <summary>
+    /// 重新调用item的回调
+    /// </summary>
+    /// <returns></returns>
+    private void reloadItem(bool isReload = false)
+    {
+        if (this.itemList.Count > 0)
+        {
+            int index = 0;
+            //print("范围:" + this.curIndex + "--------" + (this.curIndex + this.showCount));
+            for (int i = this.curIndex; i < this.curIndex + this.showCount; ++i)
+            {
+                if (this.itemList[index] != null)
+                {
+                    GameObject item = this.itemList[index];
+                    if (this.m_updateItem != null)
+                        this.m_updateItem.Invoke(item, i, isReload);
+                    index++;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 拖动时修正位置
+    /// </summary>
+    /// <returns></returns>
+    private void fixItemPos()
+    {
+        //拖动时修正位置
+        if (this.itemList.Count > 0)
+        {
+            GameObject prevItem = this.itemList[0];
+            if (this.curIndex == 0) prevItem.transform.localPosition = new Vector3(0, 0);
+            for (int i = 1; i < this.itemList.Count; ++i)
+            {
+                GameObject item = this.itemList[i];
+                if (!this.isHorizontal)
+                {
+                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
+                                                               prevItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                }
+                else
+                {
+                    item.transform.localPosition = new Vector3(prevItem.transform.localPosition.x + this.itemWidth + this.gapH,
+                                                               item.transform.localPosition.y);
+                }
+                prevItem = this.itemList[i];
+            }
+        }
     }
 
     /// <summary>
