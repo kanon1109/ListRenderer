@@ -21,7 +21,7 @@ public class Test : MonoBehaviour
             tVo.name = "name" + i;
             //this.datalist.Add(tVo);
         }
-        this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 5, updateListItem);
+        this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 10, updateListItem);
 	}
 
     private void addBtnHandler()
@@ -39,6 +39,8 @@ public class Test : MonoBehaviour
 
     void btnHandler()
     {
+        this.list.GetComponent<ListRenderer>().rollPosByIndex(10);
+        return;
         if (this.datalist.Count > 0) 
         {
             int index = Random.Range(0, this.datalist.Count - 1);

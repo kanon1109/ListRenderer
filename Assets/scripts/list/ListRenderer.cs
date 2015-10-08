@@ -45,7 +45,7 @@ public class ListRenderer : MonoBehaviour
     //是否重新加载
     private bool isReload;
     //上一个位置
-    private Vector2 prevV2;
+    private Vector2 prevItemPos;
     /// <summary>
     /// 初始化滚动列表
     /// </summary>
@@ -75,7 +75,7 @@ public class ListRenderer : MonoBehaviour
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
 
-        this.prevV2 = new Vector2();
+        this.prevItemPos = new Vector2();
         this.reloadData(count);
         this.isReload = true;
     }
@@ -93,6 +93,7 @@ public class ListRenderer : MonoBehaviour
         {
             GameObject item = MonoBehaviour.Instantiate(prefab, new Vector3(0, 0), new Quaternion()) as GameObject;
             item.transform.SetParent(this.content.gameObject.transform);
+            item.transform.localScale = new Vector3(1, 1, 1);
             item.GetComponent<ListItem>().id = i + 1;
             this.itemList.Add(item);
         }
@@ -113,21 +114,8 @@ public class ListRenderer : MonoBehaviour
             {
                 //获取item相对于scroll的坐标
                 float posY = scroll.transform.InverseTransformPoint(item.transform.position).y;
-                /*if(i == 0)
-                {
-                    print("first posY: " + posY);
-                    print("this.top: " + this.top);
-                    print("this.curIndex: " + this.curIndex);
-                    print("this.totalCount - this.showCount: " + (this.totalCount - this.showCount));
-                }
-                else if (i == this.itemList.Count - 1)
-                {
-                    print("last posY: " + posY);
-                    print("this.bottom: " + this.bottom);
-                }*/
                 if (posY > this.top && this.curIndex < this.totalCount - this.showCount)
                 {
-                    print("change：" + this.itemList.Count);
                     //往上拖动时
                     //如果第一个位置超过顶部范围，并且不是滚动到最后一个，则重新设置位置。 
                     if (this.itemList.Count > 1)
@@ -234,13 +222,10 @@ public class ListRenderer : MonoBehaviour
             this.itemList.Count > 0)
         {
             GameObject item = this.itemList[0];
-            this.prevV2.x = item.transform.localPosition.x;
-            this.prevV2.y = item.transform.localPosition.y;
+            this.prevItemPos.x = item.transform.localPosition.x;
+            this.prevItemPos.y = item.transform.localPosition.y;
         }
         //判断 当前删除的index 是否在 this.curIndex , this.curIndex + this.showCount 之间。
-        /*print("this.curIndex + this.showCount:" + (this.curIndex + this.showCount));
-        print("count:" + count);
-        print("this.curIndex:" + this.curIndex);*/
         //当前显示出来的最后一个item的index
         int curLastIndex = this.curIndex + this.showCount - 1;
         //总的最大index
@@ -252,16 +237,14 @@ public class ListRenderer : MonoBehaviour
             int overCount = curLastIndex - lastIndex;
             this.curIndex -= overCount;
             //补全位置
-            this.prevV2.y += (this.itemHeight + this.gapV) * overCount;
-            this.prevV2.x -= (this.itemWidth + this.gapH) * overCount;
+            this.prevItemPos.y += (this.itemHeight + this.gapV) * overCount;
+            this.prevItemPos.x -= (this.itemWidth + this.gapH) * overCount;
             //防止去除溢出后 索引为负数。
             if (this.curIndex < 0) this.curIndex = 0;
         }
 
         //保存上一次显示的数量
         int prevShowCount = this.showCount;
-        print("this.curIndex: " + this.curIndex);
-        print("showCount: " + showCount);
         //判断当前多出来的数量，并删除。
         this.removeOverItem(count);
         if (!this.isHorizontal) //纵向
@@ -357,9 +340,9 @@ public class ListRenderer : MonoBehaviour
         {
             GameObject item = this.itemList[i];
             if (!this.isHorizontal)
-                item.transform.localPosition = new Vector3(0, this.prevV2.y - (this.itemHeight + this.gapV) * i);
+                item.transform.localPosition = new Vector3(0, this.prevItemPos.y - (this.itemHeight + this.gapV) * i);
             else
-                item.transform.localPosition = new Vector3(this.prevV2.x + (this.itemWidth + this.gapH) * i, 0);
+                item.transform.localPosition = new Vector3(this.prevItemPos.x + (this.itemWidth + this.gapH) * i, 0);
         }
     }
 
@@ -408,6 +391,43 @@ public class ListRenderer : MonoBehaviour
         //左右
         this.left = -this.itemWidth - this.gapH;
         this.right = (this.itemWidth + this.gapH) * (this.itemList.Count - 1);
+    }
+
+    /// <summary>
+    /// 根据索引滚动到相应位置
+    /// </summary>
+    /// <param name=index>item索引</param>
+    /// <param name=delay>滚动持续时间</param>
+    /// <returns></returns>
+    public void rollPosByIndex(int index, int delay = 0)
+    {
+        if (this.curIndex == index) return;
+        if (index < 0) index = 0;
+        if (index > this.totalCount - 1) index = this.totalCount - 1;
+        if (delay < 0) delay = 0;
+        //TODO 计算出 index和当前第一个index之间的数量 × 间隔 + 高度（宽度） = 需要移动的距离
+        //判断移动的方向（向上还是向下）
+        //判断如果移动间隔如果为0，直接设置位置。
+        bool flag = true; //标记上或下（左或右）true为 下（右）
+        if (index < this.curIndex) flag = false;
+        int gapCount = Mathf.Abs(index - this.curIndex);
+
+        //算出移动的距离
+        float gap;
+        Vector3 contentPos = this.content.transform.localPosition;
+        if(!this.isHorizontal)
+        {
+            gap = (this.itemHeight + this.gapV) * gapCount;
+            if (flag) contentPos.y += gap; //向上
+            else contentPos.y -= gap; //向下
+        }
+        else
+        {
+            gap = (this.itemWidth + this.gapH) * gapCount;
+            if (flag) contentPos.x += gap;
+            else contentPos.x -= gap;
+        }
+        this.content.transform.localPosition = contentPos;
     }
 
     /// <summary>
