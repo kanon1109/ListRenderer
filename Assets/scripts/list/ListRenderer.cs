@@ -46,6 +46,8 @@ public class ListRenderer : MonoBehaviour
     private bool isReload;
     //上一个位置
     private Vector2 prevItemPos;
+    //滚动容器初始位置
+    private Vector3 contentStartPos;
     /// <summary>
     /// 初始化滚动列表
     /// </summary>
@@ -74,8 +76,8 @@ public class ListRenderer : MonoBehaviour
         this.listHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
-
         this.prevItemPos = new Vector2();
+        this.contentStartPos = this.scroll.transform.localPosition;
         this.reloadData(count);
         this.isReload = true;
     }
@@ -105,6 +107,7 @@ public class ListRenderer : MonoBehaviour
     /// <returns></returns>
     void updateItem()
     {
+        print("this.curIndex : " + this.curIndex);
         if (!this.isReload) return;
         //坐标系 上正下负
         for (int i = 0; i < this.itemList.Count; ++i)
@@ -397,37 +400,47 @@ public class ListRenderer : MonoBehaviour
     /// 根据索引滚动到相应位置
     /// </summary>
     /// <param name=index>item索引</param>
-    /// <param name=delay>滚动持续时间</param>
     /// <returns></returns>
-    public void rollPosByIndex(int index, int delay = 0)
+    public void rollPosByIndex(int targetIndex)
     {
-        if (this.curIndex == index) return;
-        if (index < 0) index = 0;
-        if (index > this.totalCount - 1) index = this.totalCount - 1;
-        if (delay < 0) delay = 0;
+        if (this.itemList == null || 
+            this.itemList.Count == 0) return;
+        this.isReload = false;
+        this.scroll.GetComponent<ScrollRect>().StopMovement();
+        if (targetIndex < 0) targetIndex = 0;
+        if (targetIndex > this.totalCount - 1) targetIndex = this.totalCount - 1;
         //TODO 计算出 index和当前第一个index之间的数量 × 间隔 + 高度（宽度） = 需要移动的距离
         //判断移动的方向（向上还是向下）
         //判断如果移动间隔如果为0，直接设置位置。
-        bool flag = true; //标记上或下（左或右）true为 下（右）
-        if (index < this.curIndex) flag = false;
-        int gapCount = Mathf.Abs(index - this.curIndex);
-
         //算出移动的距离
-        float gap;
         Vector3 contentPos = this.content.transform.localPosition;
+        float contentWidth = this.content.GetComponent<RectTransform>().sizeDelta.x;
+        float contentHeight = this.content.GetComponent<RectTransform>().sizeDelta.y;
+        float scrollWidth = this.scroll.GetComponent<RectTransform>().sizeDelta.x;
+        float scrollHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
+        float gap = 0;
+        this.curIndex = targetIndex;
+        //计算出第一个索引是多少
+        if (targetIndex + this.showCount >= this.totalCount)
+            this.curIndex -= targetIndex + this.showCount - this.totalCount;
         if(!this.isHorizontal)
         {
-            gap = (this.itemHeight + this.gapV) * gapCount;
-            if (flag) contentPos.y += gap; //向上
-            else contentPos.y -= gap; //向下
+            gap = (this.itemHeight + this.gapV) * this.curIndex;
+            contentPos.y = gap + this.contentStartPos.y;
+            this.prevItemPos.y = -gap;
+            print("prev contentPos.y" + contentPos.y);
+            print("gap " + gap);
+            print("this.contentStartPos.y " + this.contentStartPos.y);
         }
-        else
-        {
-            gap = (this.itemWidth + this.gapH) * gapCount;
-            if (flag) contentPos.x += gap;
-            else contentPos.x -= gap;
-        }
+        print("targetIndex + this.showCount - this.totalCount " + (targetIndex + this.showCount - this.totalCount));
+        print("targetIndex" + targetIndex);
+        print("curIndex" + curIndex);
+        print("contentPos.y" + contentPos.y);
+        print("lastIndex " + (this.totalCount - 1));
+        this.layoutItem();
+        this.reloadItem(true);
         this.content.transform.localPosition = contentPos;
+        this.isReload = true;
     }
 
     /// <summary>

@@ -39,11 +39,13 @@ public class Test : MonoBehaviour
 
     void btnHandler()
     {
-        this.list.GetComponent<ListRenderer>().rollPosByIndex(10);
+        int index = Random.Range(0, this.datalist.Count - 1);
+        print("跳转到index : " + index);
+        this.list.GetComponent<ListRenderer>().rollPosByIndex(index);
         return;
         if (this.datalist.Count > 0) 
         {
-            int index = Random.Range(0, this.datalist.Count - 1);
+            index = Random.Range(0, this.datalist.Count - 1);
             TestVo tVo = this.datalist[this.datalist.Count - 1];
             print("remove tVo: " + tVo.name);
             this.datalist.RemoveAt(this.datalist.Count - 1);
