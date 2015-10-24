@@ -107,7 +107,6 @@ public class ListRenderer : MonoBehaviour
     /// <returns></returns>
     void updateItem()
     {
-        print("this.curIndex : " + this.curIndex);
         if (!this.isReload) return;
         //坐标系 上正下负
         for (int i = 0; i < this.itemList.Count; ++i)
@@ -418,25 +417,25 @@ public class ListRenderer : MonoBehaviour
         float contentHeight = this.content.GetComponent<RectTransform>().sizeDelta.y;
         float scrollWidth = this.scroll.GetComponent<RectTransform>().sizeDelta.x;
         float scrollHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
-        float gap = 0;
         this.curIndex = targetIndex;
+        int index = 0;
         //计算出第一个索引是多少
         if (targetIndex + this.showCount >= this.totalCount)
-            this.curIndex -= targetIndex + this.showCount - this.totalCount;
+            index = targetIndex + this.showCount - this.totalCount;
+        this.curIndex -= index;
+        float gap;
         if(!this.isHorizontal)
         {
-            gap = (this.itemHeight + this.gapV) * this.curIndex;
-            contentPos.y = gap + this.contentStartPos.y;
-            this.prevItemPos.y = -gap;
-            print("prev contentPos.y" + contentPos.y);
-            print("gap " + gap);
-            print("this.contentStartPos.y " + this.contentStartPos.y);
+            gap = this.itemHeight + this.gapV;
+            this.prevItemPos.y = -gap * this.curIndex;
+            contentPos.y = gap * targetIndex;
         }
-        print("targetIndex + this.showCount - this.totalCount " + (targetIndex + this.showCount - this.totalCount));
-        print("targetIndex" + targetIndex);
-        print("curIndex" + curIndex);
-        print("contentPos.y" + contentPos.y);
-        print("lastIndex " + (this.totalCount - 1));
+        else
+        {
+            gap = this.itemWidth + this.gapH;
+            this.prevItemPos.x = gap * this.curIndex;
+            contentPos.x = gap * targetIndex;
+        }
         this.layoutItem();
         this.reloadItem(true);
         this.content.transform.localPosition = contentPos;

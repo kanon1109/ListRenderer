@@ -41,6 +41,7 @@ public class Test : MonoBehaviour
     {
         int index = Random.Range(0, this.datalist.Count - 1);
         print("跳转到index : " + index);
+        //this.list.GetComponent<ListRenderer>().rollPosByIndex(this.datalist.Count - 1);
         this.list.GetComponent<ListRenderer>().rollPosByIndex(index);
         return;
         if (this.datalist.Count > 0) 
