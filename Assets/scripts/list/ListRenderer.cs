@@ -76,6 +76,9 @@ public class ListRenderer : MonoBehaviour
         this.listHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
+        this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
+        this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(listWidth, listHeight);
+        this.content.transform.localPosition = new Vector3(0, 0);
         this.prevItemPos = new Vector2();
         this.contentStartPos = this.scroll.transform.localPosition;
         this.reloadData(count);
@@ -413,16 +416,10 @@ public class ListRenderer : MonoBehaviour
         //判断如果移动间隔如果为0，直接设置位置。
         //算出移动的距离
         Vector3 contentPos = this.content.transform.localPosition;
-        float contentWidth = this.content.GetComponent<RectTransform>().sizeDelta.x;
-        float contentHeight = this.content.GetComponent<RectTransform>().sizeDelta.y;
-        float scrollWidth = this.scroll.GetComponent<RectTransform>().sizeDelta.x;
-        float scrollHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
         this.curIndex = targetIndex;
-        int index = 0;
         //计算出第一个索引是多少
         if (targetIndex + this.showCount >= this.totalCount)
-            index = targetIndex + this.showCount - this.totalCount;
-        this.curIndex -= index;
+            this.curIndex -= targetIndex + this.showCount - this.totalCount;
         float gap;
         if(!this.isHorizontal)
         {
@@ -434,7 +431,8 @@ public class ListRenderer : MonoBehaviour
         {
             gap = this.itemWidth + this.gapH;
             this.prevItemPos.x = gap * this.curIndex;
-            contentPos.x = gap * targetIndex;
+            contentPos.x = -gap * targetIndex;
+            print("contentPos.x" + contentPos.x);
         }
         this.layoutItem();
         this.reloadItem(true);
