@@ -42,7 +42,7 @@ public class Test : MonoBehaviour
         int index = Random.Range(0, this.datalist.Count - 1);
         print("跳转到index : " + index);
         //this.list.GetComponent<ListRenderer>().rollPosByIndex(8);
-        this.list.GetComponent<ListRenderer>().rollPosByIndex(index);
+        this.list.GetComponent<ListRenderer>().rollPosByIndex(this.datalist.Count - 1);
         return;
         if (this.datalist.Count > 0) 
         {

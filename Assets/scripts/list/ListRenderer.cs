@@ -415,6 +415,7 @@ public class ListRenderer : MonoBehaviour
         //判断移动的方向（向上还是向下）
         //判断如果移动间隔如果为0，直接设置位置。
         //算出移动的距离
+        Vector2 contentSize = this.content.GetComponent<RectTransform>().sizeDelta;
         Vector3 contentPos = this.content.transform.localPosition;
         this.curIndex = targetIndex;
         //计算出第一个索引是多少
@@ -426,13 +427,16 @@ public class ListRenderer : MonoBehaviour
             gap = this.itemHeight + this.gapV;
             this.prevItemPos.y = -gap * this.curIndex;
             contentPos.y = gap * targetIndex;
+            if (contentPos.y > contentSize.y - this.listHeight)
+                contentPos.y = contentSize.y - this.listHeight;
         }
         else
         {
             gap = this.itemWidth + this.gapH;
             this.prevItemPos.x = gap * this.curIndex;
             contentPos.x = -gap * targetIndex;
-            print("contentPos.x" + contentPos.x);
+            if (contentPos.x > contentSize.x - this.listWidth)
+                contentPos.x = contentSize.x - this.listWidth;
         }
         this.layoutItem();
         this.reloadItem(true);
