@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 //无限数量的滚动列表
 public class ListRenderer : MonoBehaviour
@@ -99,7 +99,6 @@ public class ListRenderer : MonoBehaviour
             GameObject item = MonoBehaviour.Instantiate(prefab, new Vector3(0, 0), new Quaternion()) as GameObject;
             item.transform.SetParent(this.content.gameObject.transform);
             item.transform.localScale = new Vector3(1, 1, 1);
-            item.GetComponent<ListItem>().id = i + 1;
             this.itemList.Add(item);
         }
     }
@@ -108,7 +107,7 @@ public class ListRenderer : MonoBehaviour
     /// 更新item
     /// </summary>
     /// <returns></returns>
-    void updateItem()
+    void updateItem() 
     {
         if (!this.isReload) return;
         //坐标系 上正下负
