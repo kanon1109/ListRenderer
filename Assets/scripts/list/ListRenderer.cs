@@ -76,7 +76,7 @@ public class ListRenderer : MonoBehaviour
         this.listHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
-        this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
+        //this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
         this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(listWidth, listHeight);
         this.content.transform.localPosition = new Vector3(0, 0);
         this.prevItemPos = new Vector2();
