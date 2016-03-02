@@ -391,10 +391,10 @@ public class ListRenderer : MonoBehaviour
     {
         //上下
         this.top = this.itemHeight + this.gapV;
-        this.bottom = -(this.itemHeight + this.gapV) * (this.itemList.Count - 1);
+        this.bottom = -(this.itemHeight + this.gapV) * (this.showCount - 1);
         //左右
         this.left = -this.itemWidth - this.gapH;
-        this.right = (this.itemWidth + this.gapH) * (this.itemList.Count - 1);
+        this.right = (this.itemWidth + this.gapH) * (this.showCount - 1);
     }
 
     /// <summary>
