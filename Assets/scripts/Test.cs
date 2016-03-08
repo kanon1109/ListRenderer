@@ -15,11 +15,11 @@ public class Test : MonoBehaviour
         this.addBtn.onClick.AddListener(addBtnHandler);
         this.btn.onClick.AddListener(btnHandler);
         this.datalist = new List<TestVo>();
-        for (int i = 0; i < 30; ++i)
+        for (int i = 0; i < 300; ++i)
         {
             TestVo tVo = new TestVo();
             tVo.name = "name" + i;
-            //this.datalist.Add(tVo);
+            this.datalist.Add(tVo);
         }
         this.list.GetComponent<ListRenderer>().init(false, datalist.Count, 10, updateListItem);
 	}
@@ -33,6 +33,14 @@ public class Test : MonoBehaviour
         tVo = new TestVo();
         tVo.name = "name" + this.datalist.Count;
         this.datalist.Add(tVo);
+
+        this.datalist = new List<TestVo>();
+        for (int i = 0; i < Random.Range(10, 40); ++i)
+        {
+            tVo = new TestVo();
+            tVo.name = "name" + i;
+            this.datalist.Add(tVo);
+        }
 
         this.list.GetComponent<ListRenderer>().reloadData(this.datalist.Count);
     }

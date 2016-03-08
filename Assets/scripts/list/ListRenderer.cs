@@ -48,6 +48,8 @@ public class ListRenderer : MonoBehaviour
     private Vector2 prevItemPos;
     //滚动容器初始位置
     private Vector3 contentStartPos;
+    //内容的transform属性
+    private RectTransform contentRectTf;
     /// <summary>
     /// 初始化滚动列表
     /// </summary>
@@ -77,7 +79,8 @@ public class ListRenderer : MonoBehaviour
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
         //this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
-        this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(listWidth, listHeight);
+        this.contentRectTf = this.content.GetComponent<RectTransform>();
+        this.contentRectTf.sizeDelta = new Vector2(listWidth, listHeight);
         this.content.transform.localPosition = new Vector3(0, 0);
         this.prevItemPos = new Vector2();
         this.contentStartPos = this.scroll.transform.localPosition;
@@ -241,8 +244,10 @@ public class ListRenderer : MonoBehaviour
             int overCount = curLastIndex - lastIndex;
             this.curIndex -= overCount;
             //补全位置
-            this.prevItemPos.y += (this.itemHeight + this.gapV) * overCount;
-            this.prevItemPos.x -= (this.itemWidth + this.gapH) * overCount;
+            if (!isHorizontal)
+                this.prevItemPos.y += (this.itemHeight + this.gapV) * overCount;
+            else
+                this.prevItemPos.x -= (this.itemWidth + this.gapH) * overCount;
             //防止去除溢出后 索引为负数。
             if (this.curIndex < 0) this.curIndex = 0;
         }
@@ -270,9 +275,12 @@ public class ListRenderer : MonoBehaviour
         this.updateBorder();
         //设置layout可滚动范围的高宽
         if (!this.isHorizontal)
-            this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(this.content.GetComponent<RectTransform>().sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
+            this.contentRectTf.sizeDelta = new Vector2(this.contentRectTf.sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
         else
-            this.content.GetComponent<RectTransform>().sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.content.GetComponent<RectTransform>().sizeDelta.y);
+            this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
+
+        //TODO 判断content 是否在scroll容器外。补全超过的位置
+
         //布局
         this.layoutItem();
         //重新调用回调
