@@ -288,7 +288,7 @@ public class ListRenderer : MonoBehaviour
         else
         {
             this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
-            //防止数量减少后content的位置在遮罩上面
+            //防止数量减少后content的位置在遮罩左面
             if (this.contentRectTf.localPosition.x < -this.contentRectTf.sizeDelta.x + this.listWidth)
             {
                 this.content.transform.localPosition =
