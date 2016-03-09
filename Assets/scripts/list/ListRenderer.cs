@@ -275,12 +275,28 @@ public class ListRenderer : MonoBehaviour
         this.updateBorder();
         //设置layout可滚动范围的高宽
         if (!this.isHorizontal)
+        {
             this.contentRectTf.sizeDelta = new Vector2(this.contentRectTf.sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
+            float posY = this.contentRectTf.localPosition.y - this.contentRectTf.sizeDelta.y;
+            //防止数量减少后content的位置在遮罩上面
+            if (this.contentRectTf.localPosition.y > this.contentRectTf.sizeDelta.y - this.listHeight)
+            {
+                this.content.transform.localPosition =
+                    new Vector3(this.content.transform.localPosition.x, this.contentRectTf.sizeDelta.y - this.listHeight);
+            }
+        }
         else
+        {
             this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
+            //防止数量减少后content的位置在遮罩上面
+            if (this.contentRectTf.localPosition.x < -this.contentRectTf.sizeDelta.x + this.listWidth)
+            {
+                this.content.transform.localPosition =
+                        new Vector3(-this.contentRectTf.sizeDelta.x + this.listWidth, this.content.transform.localPosition.y);
+            }
+        }
 
         //TODO 判断content 是否在scroll容器外。补全超过的位置
-
         //布局
         this.layoutItem();
         //重新调用回调
@@ -422,7 +438,7 @@ public class ListRenderer : MonoBehaviour
         //判断移动的方向（向上还是向下）
         //判断如果移动间隔如果为0，直接设置位置。
         //算出移动的距离
-        Vector2 contentSize = this.content.GetComponent<RectTransform>().sizeDelta;
+        Vector2 contentSize = this.contentRectTf.sizeDelta;
         Vector3 contentPos = this.content.transform.localPosition;
         this.curIndex = targetIndex;
         //计算出第一个索引是多少
@@ -442,8 +458,8 @@ public class ListRenderer : MonoBehaviour
             gap = this.itemWidth + this.gapH;
             this.prevItemPos.x = gap * this.curIndex;
             contentPos.x = -gap * targetIndex;
-            if (contentPos.x > contentSize.x - this.listWidth)
-                contentPos.x = contentSize.x - this.listWidth;
+            if (contentPos.x < -contentSize.x + this.listWidth)
+                contentPos.x = -contentSize.x + this.listWidth;
         }
         this.layoutItem();
         this.reloadItem(true);
