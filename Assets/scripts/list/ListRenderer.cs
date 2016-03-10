@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 //无限数量的滚动列表
+//注：
+//  content的锚点需设为（0，1）
+//  listItem的锚点需设为（0，1）
 public class ListRenderer : MonoBehaviour
 {
     public GameObject content;
@@ -81,6 +84,7 @@ public class ListRenderer : MonoBehaviour
         this.listHeight = this.scroll.GetComponent<RectTransform>().sizeDelta.y;
         this.itemWidth = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.x;
         this.itemHeight = this.itemPrefab.GetComponent<RectTransform>().sizeDelta.y;
+
         //this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
         this.contentRectTf = this.content.GetComponent<RectTransform>();
         this.contentRectTf.sizeDelta = new Vector2(listWidth, listHeight);
