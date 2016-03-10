@@ -282,7 +282,6 @@ public class ListRenderer : MonoBehaviour
         if (!this.isHorizontal)
         {
             this.contentRectTf.sizeDelta = new Vector2(this.contentRectTf.sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
-            float posY = this.contentRectTf.localPosition.y - this.contentRectTf.sizeDelta.y;
             //防止数量减少后content的位置在遮罩上面
             if (this.contentRectTf.localPosition.y > this.contentRectTf.sizeDelta.y - this.listHeight)
             {
@@ -300,8 +299,6 @@ public class ListRenderer : MonoBehaviour
                         new Vector3(-this.contentRectTf.sizeDelta.x + this.listWidth, this.contentRectTf.localPosition.y);
             }
         }
-
-        //TODO 判断content 是否在scroll容器外。补全超过的位置
         //布局
         this.layoutItem();
         //重新调用回调
