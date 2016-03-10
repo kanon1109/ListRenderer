@@ -278,33 +278,28 @@ public class ListRenderer : MonoBehaviour
         this.createItem(this.itemPrefab, creatCount);
         //获取最新边界
         this.updateBorder();
-        //设置layout可滚动范围的高宽
-        if (!this.isHorizontal)
-        {
-            this.contentRectTf.sizeDelta = new Vector2(this.contentRectTf.sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
-            //防止数量减少后content的位置在遮罩上面
-            if (this.contentRectTf.localPosition.y > this.contentRectTf.sizeDelta.y - this.listHeight)
-            {
-                this.contentRectTf.localPosition =
-                    new Vector3(this.contentRectTf.localPosition.x, this.contentRectTf.sizeDelta.y - this.listHeight);
-            }
-        }
-        else
-        {
-            this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
-            //防止数量减少后content的位置在遮罩左面
-            if (this.contentRectTf.localPosition.x < -this.contentRectTf.sizeDelta.x + this.listWidth)
-            {
-                this.contentRectTf.localPosition =
-                        new Vector3(-this.contentRectTf.sizeDelta.x + this.listWidth, this.contentRectTf.localPosition.y);
-            }
-        }
+        //总数更新content大小
+        this.updateContentSize();
+        //修正content的位置
+        this.fixContentPos();
         //布局
         this.layoutItem();
         //重新调用回调
         this.reloadItem(true);
         this.isReload = true;
     }
+
+    /// <summary>
+    /// 根据创建的总数更新content的大小
+    /// </summary>
+    private void updateContentSize()
+    {
+        if (!this.isHorizontal)
+            this.contentRectTf.sizeDelta = new Vector2(this.contentRectTf.sizeDelta.x, this.totalCount * (this.itemHeight + this.gapV));
+        else
+            this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
+    }
+
 
     /// <summary>
     /// 重新调用item的回调
@@ -357,6 +352,45 @@ public class ListRenderer : MonoBehaviour
                 }
                 prevItem = this.itemList[i];
                 prevItemTf = prevItem.transform;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 修正content的位置
+    /// </summary>
+    private void fixContentPos()
+    {
+        if (!this.isHorizontal)
+        {
+            //防止数量减少后content的位置在遮罩上面
+            if (this.contentRectTf.sizeDelta.y <= this.listHeight)
+            {
+                //如果高度不够但content顶部超过scroll的顶部则content顶部归零对齐
+                if (this.contentRectTf.localPosition.y > 0)
+                    this.contentRectTf.localPosition = new Vector3(this.contentRectTf.localPosition.x, 0);
+            }
+            else
+            {
+                //如果高度足够但content底部超过scroll的底部则content底部对齐scroll的底部
+                if (this.contentRectTf.localPosition.y - this.contentRectTf.sizeDelta.y > -this.listHeight)
+                    this.contentRectTf.localPosition = new Vector3(this.contentRectTf.localPosition.x,
+                                                                    -this.listHeight + this.contentRectTf.sizeDelta.y);
+            }
+        }
+        else
+        {
+            //防止数量减少后content的位置在遮罩左面
+            if (this.contentRectTf.sizeDelta.x <= this.listWidth)
+            {
+                if (this.contentRectTf.localPosition.x < 0)
+                    this.contentRectTf.localPosition = new Vector3(0, this.contentRectTf.localPosition.y);
+            }
+            else
+            {
+                if (this.contentRectTf.localPosition.x + this.contentRectTf.sizeDelta.x < this.listWidth)
+                    this.contentRectTf.localPosition = new Vector3(this.listWidth - this.contentRectTf.sizeDelta.x,
+                                                                    this.contentRectTf.localPosition.y);
             }
         }
     }
@@ -439,7 +473,6 @@ public class ListRenderer : MonoBehaviour
         this.sr.StopMovement();
         if (targetIndex < 0) targetIndex = 0;
         if (targetIndex > this.totalCount - 1) targetIndex = this.totalCount - 1;
-        Vector2 contentSize = this.contentRectTf.sizeDelta;
         Vector3 contentPos = this.contentRectTf.localPosition;
         this.curIndex = targetIndex;
         //计算出第一个索引是多少， 因为第一个curIndex不一定是targetIndex 
@@ -451,20 +484,17 @@ public class ListRenderer : MonoBehaviour
             gap = this.itemHeight + this.gapV;
             this.prevItemPos.y = -gap * this.curIndex; //算出移动的距离
             contentPos.y = gap * targetIndex;
-            if (contentPos.y > contentSize.y - this.listHeight)
-                contentPos.y = contentSize.y - this.listHeight;
         }
         else
         {
             gap = this.itemWidth + this.gapH;
             this.prevItemPos.x = gap * this.curIndex; //算出移动的距离
             contentPos.x = -gap * targetIndex;
-            if (contentPos.x < -contentSize.x + this.listWidth)
-                contentPos.x = -contentSize.x + this.listWidth;
         }
+        this.contentRectTf.localPosition = contentPos;
         this.layoutItem();
         this.reloadItem(true);
-        this.contentRectTf.localPosition = contentPos;
+        this.fixContentPos();
         this.isReload = true;
     }
 
