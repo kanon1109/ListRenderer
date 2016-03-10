@@ -50,6 +50,8 @@ public class ListRenderer : MonoBehaviour
     private Vector3 contentStartPos;
     //内容的transform属性
     private RectTransform contentRectTf;
+    //滚动组件
+    private ScrollRect sr;
     /// <summary>
     /// 初始化滚动列表
     /// </summary>
@@ -70,8 +72,9 @@ public class ListRenderer : MonoBehaviour
         this.m_updateItem = updateItem;
         this.isHorizontal = isHorizontal;
         //设置组件横向纵向滚动
-        this.scroll.GetComponent<ScrollRect>().horizontal = this.isHorizontal;
-        this.scroll.GetComponent<ScrollRect>().vertical = !this.isHorizontal;
+        this.sr = this.scroll.GetComponent<ScrollRect>();
+        this.sr.horizontal = this.isHorizontal;
+        this.sr.vertical = !this.isHorizontal;
         this.gapH = gap;
         this.gapV = gap;
         this.listWidth = this.scroll.GetComponent<RectTransform>().sizeDelta.x;
@@ -81,7 +84,7 @@ public class ListRenderer : MonoBehaviour
         //this.scroll.transform.localPosition = new Vector3(-this.listWidth / 2, this.listHeight / 2);
         this.contentRectTf = this.content.GetComponent<RectTransform>();
         this.contentRectTf.sizeDelta = new Vector2(listWidth, listHeight);
-        this.content.transform.localPosition = new Vector3(0, 0);
+        this.contentRectTf.localPosition = new Vector3(0, 0);
         this.prevItemPos = new Vector2();
         this.contentStartPos = this.scroll.transform.localPosition;
         this.reloadData(count);
@@ -117,10 +120,11 @@ public class ListRenderer : MonoBehaviour
         for (int i = 0; i < this.itemList.Count; ++i)
         {
             GameObject item = this.itemList[i];
+            Transform itemTf = item.transform;
             if(!this.isHorizontal)
             {
                 //获取item相对于scroll的坐标
-                float posY = scroll.transform.InverseTransformPoint(item.transform.position).y;
+                float posY = scroll.transform.InverseTransformPoint(itemTf.position).y;
                 if (posY > this.top && this.curIndex < this.totalCount - this.showCount)
                 {
                     //往上拖动时
@@ -129,14 +133,14 @@ public class ListRenderer : MonoBehaviour
                     {
                         this.itemList.RemoveAt(i);
                         GameObject lastItem = this.itemList[this.itemList.Count - 1];
-                        item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                                   lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                        itemTf.localPosition = new Vector3(itemTf.localPosition.x,
+                                                            lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
                         this.itemList.Add(item);
                         this.curIndex++;
                     }
                     else
                     {
-                        item.transform.localPosition = new Vector3(item.transform.localPosition.x, -this.itemHeight - this.gapV);
+                        itemTf.localPosition = new Vector3(itemTf.localPosition.x, -this.itemHeight - this.gapV);
                         this.curIndex = 0;
                     }
                     break;
@@ -149,14 +153,14 @@ public class ListRenderer : MonoBehaviour
                     {
                         this.itemList.RemoveAt(i);
                         GameObject firstItem = this.itemList[0];
-                        item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                                   firstItem.transform.localPosition.y + this.itemHeight + this.gapV);
+                        itemTf.localPosition = new Vector3(itemTf.localPosition.x,
+                                                            firstItem.transform.localPosition.y + this.itemHeight + this.gapV);
                         this.itemList.Insert(0, item);
                         this.curIndex--;
                     }
                     else
                     {
-                        item.transform.localPosition = new Vector3(item.transform.localPosition.x, -this.itemHeight - this.gapV);
+                        itemTf.localPosition = new Vector3(itemTf.localPosition.x, -this.itemHeight - this.gapV);
                         this.curIndex = 0;
                     }
                     break;
@@ -165,7 +169,7 @@ public class ListRenderer : MonoBehaviour
             else
             {
                 //获取item相对于scroll的坐标
-                float posX = scroll.transform.InverseTransformPoint(item.transform.position).x;
+                float posX = scroll.transform.InverseTransformPoint(itemTf.position).x;
                 if (posX < this.left && this.curIndex < this.totalCount - this.showCount)
                 {
                     //往上拖动时
@@ -174,15 +178,14 @@ public class ListRenderer : MonoBehaviour
                     {
                         this.itemList.RemoveAt(i);
                         GameObject lastItem = this.itemList[this.itemList.Count - 1];
-                        item.transform.localPosition = new Vector3(lastItem.transform.localPosition.x + this.itemWidth + this.gapH,
-                                                                   item.transform.localPosition.y);
+                        itemTf.localPosition = new Vector3(lastItem.transform.localPosition.x + this.itemWidth + this.gapH,
+                                                            itemTf.localPosition.y);
                         this.itemList.Add(item);
                         this.curIndex++;
                     }
                     else
                     {
-                        item.transform.localPosition = new Vector3(this.itemWidth + this.gapH,
-                                                                   item.transform.localPosition.y);
+                        itemTf.localPosition = new Vector3(this.itemWidth + this.gapH, itemTf.localPosition.y);
                         this.curIndex = 0;
                     }
                     break;
@@ -195,22 +198,20 @@ public class ListRenderer : MonoBehaviour
                     {
                         this.itemList.RemoveAt(i);
                         GameObject firstItem = this.itemList[0];
-                        item.transform.localPosition = new Vector3(firstItem.transform.localPosition.x - this.itemWidth - this.gapH,
-                                                                   item.transform.localPosition.y);
+                        itemTf.localPosition = new Vector3(firstItem.transform.localPosition.x - this.itemWidth - this.gapH,
+                                                            itemTf.localPosition.y);
                         this.itemList.Insert(0, item);
                         this.curIndex--;
                     }
                     else
                     {
-                        item.transform.localPosition = new Vector3(this.itemWidth + this.gapH,
-                                                                   item.transform.localPosition.y);
+                        itemTf.localPosition = new Vector3(this.itemWidth + this.gapH, itemTf.localPosition.y);
                         this.curIndex = 0;
                     }
                     break;
                 }
             }
         }
-
         //重新调用item回调
         this.reloadItem();
         this.fixItemPos();
@@ -281,8 +282,8 @@ public class ListRenderer : MonoBehaviour
             //防止数量减少后content的位置在遮罩上面
             if (this.contentRectTf.localPosition.y > this.contentRectTf.sizeDelta.y - this.listHeight)
             {
-                this.content.transform.localPosition =
-                    new Vector3(this.content.transform.localPosition.x, this.contentRectTf.sizeDelta.y - this.listHeight);
+                this.contentRectTf.localPosition =
+                    new Vector3(this.contentRectTf.localPosition.x, this.contentRectTf.sizeDelta.y - this.listHeight);
             }
         }
         else
@@ -291,8 +292,8 @@ public class ListRenderer : MonoBehaviour
             //防止数量减少后content的位置在遮罩左面
             if (this.contentRectTf.localPosition.x < -this.contentRectTf.sizeDelta.x + this.listWidth)
             {
-                this.content.transform.localPosition =
-                        new Vector3(-this.contentRectTf.sizeDelta.x + this.listWidth, this.content.transform.localPosition.y);
+                this.contentRectTf.localPosition =
+                        new Vector3(-this.contentRectTf.sizeDelta.x + this.listWidth, this.contentRectTf.localPosition.y);
             }
         }
 
@@ -337,21 +338,24 @@ public class ListRenderer : MonoBehaviour
         if (this.itemList.Count > 0)
         {
             GameObject prevItem = this.itemList[0];
-            if (this.curIndex == 0) prevItem.transform.localPosition = new Vector3(0, 0);
+            Transform prevItemTf = prevItem.transform;
+            if (this.curIndex == 0) prevItemTf.localPosition = new Vector3(0, 0);
             for (int i = 1; i < this.itemList.Count; ++i)
             {
                 GameObject item = this.itemList[i];
+                Transform itemTf = item.transform;
                 if (!this.isHorizontal)
                 {
-                    item.transform.localPosition = new Vector3(item.transform.localPosition.x,
-                                                               prevItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                    itemTf.localPosition = new Vector3(itemTf.localPosition.x,
+                                                        prevItemTf.localPosition.y - this.itemHeight - this.gapV);
                 }
                 else
                 {
-                    item.transform.localPosition = new Vector3(prevItem.transform.localPosition.x + this.itemWidth + this.gapH,
-                                                               item.transform.localPosition.y);
+                    itemTf.localPosition = new Vector3(prevItemTf.localPosition.x + this.itemWidth + this.gapH,
+                                                        itemTf.localPosition.y);
                 }
                 prevItem = this.itemList[i];
+                prevItemTf = prevItem.transform;
             }
         }
     }
@@ -431,24 +435,20 @@ public class ListRenderer : MonoBehaviour
         if (this.itemList == null || 
             this.itemList.Count == 0) return;
         this.isReload = false;
-        this.scroll.GetComponent<ScrollRect>().StopMovement();
+        this.sr.StopMovement();
         if (targetIndex < 0) targetIndex = 0;
         if (targetIndex > this.totalCount - 1) targetIndex = this.totalCount - 1;
-        //TODO 计算出 index和当前第一个index之间的数量 × 间隔 + 高度（宽度） = 需要移动的距离
-        //判断移动的方向（向上还是向下）
-        //判断如果移动间隔如果为0，直接设置位置。
-        //算出移动的距离
         Vector2 contentSize = this.contentRectTf.sizeDelta;
-        Vector3 contentPos = this.content.transform.localPosition;
+        Vector3 contentPos = this.contentRectTf.localPosition;
         this.curIndex = targetIndex;
-        //计算出第一个索引是多少
-        if (targetIndex + this.showCount >= this.totalCount)
+        //计算出第一个索引是多少， 因为第一个curIndex不一定是targetIndex 
+        if (targetIndex + this.showCount > this.totalCount)
             this.curIndex -= targetIndex + this.showCount - this.totalCount;
         float gap;
         if(!this.isHorizontal)
         {
             gap = this.itemHeight + this.gapV;
-            this.prevItemPos.y = -gap * this.curIndex;
+            this.prevItemPos.y = -gap * this.curIndex; //算出移动的距离
             contentPos.y = gap * targetIndex;
             if (contentPos.y > contentSize.y - this.listHeight)
                 contentPos.y = contentSize.y - this.listHeight;
@@ -456,14 +456,14 @@ public class ListRenderer : MonoBehaviour
         else
         {
             gap = this.itemWidth + this.gapH;
-            this.prevItemPos.x = gap * this.curIndex;
+            this.prevItemPos.x = gap * this.curIndex; //算出移动的距离
             contentPos.x = -gap * targetIndex;
             if (contentPos.x < -contentSize.x + this.listWidth)
                 contentPos.x = -contentSize.x + this.listWidth;
         }
         this.layoutItem();
         this.reloadItem(true);
-        this.content.transform.localPosition = contentPos;
+        this.contentRectTf.localPosition = contentPos;
         this.isReload = true;
     }
 
