@@ -135,8 +135,8 @@ public class ListRenderer : MonoBehaviour
                     //如果第一个位置超过顶部范围，并且不是滚动到最后一个，则重新设置位置。 
                     if (this.itemList.Count > 1)
                     {
-                        this.itemList.RemoveAt(i);
                         GameObject lastItem = this.itemList[this.itemList.Count - 1];
+                        this.itemList.RemoveAt(i);
                         itemTf.localPosition = new Vector3(itemTf.localPosition.x,
                                                             lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
                         this.itemList.Add(item);
@@ -155,8 +155,8 @@ public class ListRenderer : MonoBehaviour
                     //如果底部位置超过范围,并且不是滚动到第一个位置，则重新设置位置。
                     if (this.itemList.Count > 1)
                     {
-                        this.itemList.RemoveAt(i);
                         GameObject firstItem = this.itemList[0];
+                        this.itemList.RemoveAt(i);
                         itemTf.localPosition = new Vector3(itemTf.localPosition.x,
                                                             firstItem.transform.localPosition.y + this.itemHeight + this.gapV);
                         this.itemList.Insert(0, item);
@@ -176,12 +176,12 @@ public class ListRenderer : MonoBehaviour
                 float posX = scroll.transform.InverseTransformPoint(itemTf.position).x;
                 if (posX < this.left && this.curIndex < this.totalCount - this.showCount)
                 {
-                    //往上拖动时
+                    //往左拖动时
                     //如果第一个位置超过顶部范围，并且不是滚动到最后一个，则重新设置位置。
                     if (this.itemList.Count > 1)
                     {
-                        this.itemList.RemoveAt(i);
                         GameObject lastItem = this.itemList[this.itemList.Count - 1];
+                        this.itemList.RemoveAt(i);
                         itemTf.localPosition = new Vector3(lastItem.transform.localPosition.x + this.itemWidth + this.gapH,
                                                             itemTf.localPosition.y);
                         this.itemList.Add(item);
@@ -196,12 +196,12 @@ public class ListRenderer : MonoBehaviour
                 }
                 else if (posX > this.right && this.curIndex > 0)
                 {
-                    //往下拖动时
+                    //往右拖动时
                     //如果底部位置超过范围,并且不是滚动到第一个位置，则重新设置位置。
                     if (this.itemList.Count > 1)
                     {
-                        this.itemList.RemoveAt(i);
                         GameObject firstItem = this.itemList[0];
+                        this.itemList.RemoveAt(i);
                         itemTf.localPosition = new Vector3(firstItem.transform.localPosition.x - this.itemWidth - this.gapH,
                                                             itemTf.localPosition.y);
                         this.itemList.Insert(0, item);
@@ -299,7 +299,6 @@ public class ListRenderer : MonoBehaviour
         else
             this.contentRectTf.sizeDelta = new Vector2(this.totalCount * (this.itemWidth + this.gapH), this.contentRectTf.sizeDelta.y);
     }
-
 
     /// <summary>
     /// 重新调用item的回调
