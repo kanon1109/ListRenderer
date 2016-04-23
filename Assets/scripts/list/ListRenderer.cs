@@ -138,7 +138,7 @@ public class ListRenderer : MonoBehaviour
                         GameObject lastItem = this.itemList[this.itemList.Count - 1];
                         this.itemList.RemoveAt(i);
                         itemTf.localPosition = new Vector3(itemTf.localPosition.x,
-                                                            lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
+                                                           lastItem.transform.localPosition.y - this.itemHeight - this.gapV);
                         this.itemList.Add(item);
                         this.curIndex++;
                     }
@@ -218,7 +218,6 @@ public class ListRenderer : MonoBehaviour
         }
         //重新调用item回调
         this.reloadItem();
-        this.fixItemPos();
     }
 
     /// <summary>
@@ -248,13 +247,20 @@ public class ListRenderer : MonoBehaviour
             //获取溢出数量
             int overCount = curLastIndex - lastIndex;
             this.curIndex -= overCount;
-            //补全位置
-            if (!isHorizontal)
-                this.prevItemPos.y += (this.itemHeight + this.gapV) * overCount;
-            else
-                this.prevItemPos.x -= (this.itemWidth + this.gapH) * overCount;
             //防止去除溢出后 索引为负数。
             if (this.curIndex < 0) this.curIndex = 0;
+            if (this.curIndex == 0)
+            {
+                this.prevItemPos = new Vector2();
+            }
+            else
+            {
+                //补全位置
+                if (!isHorizontal)
+                    this.prevItemPos.y += (this.itemHeight + this.gapV) * overCount;
+                else
+                    this.prevItemPos.x -= (this.itemWidth + this.gapH) * overCount;
+            }
         }
 
         //保存上一次显示的数量
@@ -319,38 +325,6 @@ public class ListRenderer : MonoBehaviour
                         this.m_updateItem.Invoke(item, i, isReload);
                     index++;
                 }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 拖动时修正位置
-    /// </summary>
-    /// <returns></returns>
-    private void fixItemPos()
-    {
-        //拖动时修正位置
-        if (this.itemList.Count > 0)
-        {
-            GameObject prevItem = this.itemList[0];
-            Transform prevItemTf = prevItem.transform;
-            if (this.curIndex == 0) prevItemTf.localPosition = new Vector3(0, 0);
-            for (int i = 1; i < this.itemList.Count; ++i)
-            {
-                GameObject item = this.itemList[i];
-                Transform itemTf = item.transform;
-                if (!this.isHorizontal)
-                {
-                    itemTf.localPosition = new Vector3(itemTf.localPosition.x,
-                                                        prevItemTf.localPosition.y - this.itemHeight - this.gapV);
-                }
-                else
-                {
-                    itemTf.localPosition = new Vector3(prevItemTf.localPosition.x + this.itemWidth + this.gapH,
-                                                        itemTf.localPosition.y);
-                }
-                prevItem = this.itemList[i];
-                prevItemTf = prevItem.transform;
             }
         }
     }

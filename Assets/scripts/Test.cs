@@ -15,7 +15,7 @@ public class Test : MonoBehaviour
         this.addBtn.onClick.AddListener(addBtnHandler);
         this.btn.onClick.AddListener(btnHandler);
         this.datalist = new List<TestVo>();
-        for (int i = 0; i < 300; ++i)
+        for (int i = 0; i < 35; ++i)
         {
             TestVo tVo = new TestVo();
             tVo.name = "name" + i;
@@ -35,7 +35,7 @@ public class Test : MonoBehaviour
         this.datalist.Add(tVo);
 
         this.datalist = new List<TestVo>();
-        for (int i = 0; i < Random.Range(10, 40); ++i)
+        for (int i = 0; i < Random.Range(1, 20); ++i)
         {
             tVo = new TestVo();
             tVo.name = "name" + i;
@@ -48,9 +48,9 @@ public class Test : MonoBehaviour
     void btnHandler()
     {
         int index = Random.Range(0, this.datalist.Count - 1);
-        print("跳转到index : " + index);
-        //this.list.GetComponent<ListRenderer>().rollPosByIndex(8);
-        this.list.GetComponent<ListRenderer>().rollPosByIndex(this.datalist.Count - 1);
+        //print("跳转到index : " + index);
+        this.list.GetComponent<ListRenderer>().rollPosByIndex(index);
+        //this.list.GetComponent<ListRenderer>().rollPosByIndex(this.datalist.Count - 1);
         return;
         if (this.datalist.Count > 0) 
         {
